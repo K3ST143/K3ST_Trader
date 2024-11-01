@@ -1,4 +1,4 @@
-docs/README.md
+.docs/README.md
 # README.md
 # Addis Global Trader
 
