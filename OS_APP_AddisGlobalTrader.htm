@@ -1,0 +1,853 @@
+# .doc/index.html
+AddisGlobalTrader/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   ├── utils.py
+│   │   ├── education_routes.py
+│   │   ├── receptionist_routes.py
+│   │   ├── ai_receptionist.py
+│   │   ├── stock_routes.py
+│   │   ├── investor_routes.py
+│   │   ├── financial_routes.py
+│   │   ├── corporate_routes.py
+│   │   ├── compliance_routes.py
+│   ├── config.py
+│   ├── requirements.txt
+│   └── run.py
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   │   ├── HomePage.js
+│   │   │   ├── LoginPage.js
+│   │   │   ├── AdminDashboard.js
+│   │   │   ├── VirtualCampus.js
+│   │   │   ├── VirtualReceptionist.js
+│   │   │   ├── StockDashboard.js
+│   │   │   ├── InvestorDashboard.js
+│   │   │   ├── FinancialDashboard.js
+│   │   │   ├── CorporateDashboard.js
+│   │   │   ├── ComplianceDashboard.js
+│   │   ├── App.js
+│   │   ├── index.js
+│   │   ├── i18n.js
+│   ├── package.json
+├── database/
+│   ├── migrations/
+│   ├── models/
+│   ├── seeds/
+│   └── database.py
+├── docs/
+│   ├── README.md
+│   ├── setup_guide.md
+│   ├── user_guide.md
+│   ├── Business_Conduct_and_Code_of_Ethics.pdf
+│   ├── Corporate_Governance.pdf
+│   ├── Innovation_Documentation.pdf
+│   ├── Business_Plan.pdf
+│   └── Compliance_Reporting.pdf
+└── .gitignore
+
+import os
+
+def create_file(path, content=""):
+    with open(path, 'w') as file:
+        file.write(content)
+
+def create_project_structure():
+    # Directories
+    directories = [
+        'AddisGlobalTrader/backend/app',
+        'AddisGlobalTrader/frontend/public',
+        'AddisGlobalTrader/frontend/src/components',
+        'AddisGlobalTrader/frontend/src/pages',
+        'AddisGlobalTrader/database/migrations',
+        'AddisGlobalTrader/database/models',
+        'AddisGlobalTrader/database/seeds',
+        'AddisGlobalTrader/docs'
+    ]
+    
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+    
+    # Backend files
+    create_file('AddisGlobalTrader/backend/app/__init__.py', """from flask import Flask
+from .config import Config
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    with app.app_context():
+        from . import routes, education_routes, receptionist_routes
+        return app
+""")
+    
+    create_file('AddisGlobalTrader/backend/app/models.py', """from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    language = db.Column(db.String(10), nullable=False)
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    url = db.Column(db.String(200), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+class BankStatement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    statement = db.Column(db.Text, nullable=False)
+""")
+    
+    create_file('AddisGlobalTrader/backend/app/routes.py', """from flask import Blueprint, request, jsonify
+from .models import db, User
+
+bp = Blueprint('main', __name__)
+
+@bp.route('/users', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    new_user = User(username=data['username'], email=data['email'], password=data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User created successfully'}), 201
+""")
+    
+    create_file('AddisGlobalTrader/backend/app/education_routes.py', """from flask import Blueprint, request, jsonify
+from .models import db, Course, Video
+
+education_bp = Blueprint('education', __name__)
+
+@education_bp.route('/courses', methods=['GET'])
+def get_courses():
+    courses = Course.query.all()
+    return jsonify([course.to_dict() for course in courses])
+
+@education_bp.route('/courses', methods=['POST'])
+def add_course():
+    data = request.get_json()
+    new_course = Course(
+        title=data['title'],
+        description=data['description'],
+        language=data['language']
+    )
+    db.session.add(new_course)
+    db.session.commit()
+    return jsonify(new_course.to_dict()), 201
+
+@education_bp.route('/videos', methods=['POST'])
+def add_video():
+    data = request.get_json()
+    new_video = Video(
+        title=data['title'],
+        url=data['url'],
+        course_id=data['course_id']
+    )
+    db.session.add(new_video)
+    db.session.commit()
+    return jsonify(new_video.to_dict()), 201
+""")
+    
+    create_file('AddisGlobalTrader/backend/app/receptionist_routes.py', """from flask import Blueprint, request, jsonify
+from .models import db, User, BankStatement
+from .ai_receptionist import AIReceptionist
+
+receptionist_bp = Blueprint('receptionist', __name__)
+ai_receptionist = AIReceptionist()
+
+@receptionist_bp.route('/register', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    new_user = User(username=data['username'], email=data['email'], password=data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User registered successfully'}), 201
+
+@receptionist_bp.route('/bank_statements', methods=['GET'])
+def get_bank_statements():
+    user_id = request.args.get('user_id')
+    statements = BankStatement.query.filter_by(user_id=user_id).all()
+    return jsonify([statement.to_dict() for statement in statements])
+""")
+    
+    create_file('AddisGlobalTrader/backend/app/ai_receptionist.py', """class AIReceptionist:
+    def __init__(self):
+        # Initialize AI model and other necessary components
+        pass
+
+    def handle_request(self, request_data):
+        # Process the request and generate a response
+        pass
+""")
+    
+    create_file('AddisGlobalTrader/backend/config.py', """class Config:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_TRANSLATION_DIRECTORIES = '../translations'
+""")
+    
+    create_file('AddisGlobalTrader/backend/requirements.txt', """Flask
+Flask-SQLAlchemy
+Flask-Babel
+""")
+    
+    create_file('AddisGlobalTrader/backend/run.py', """from app import create_app
+
+app = create_app()
+
+if __name__ == '__main__':
+    app.run(debug=True)
+""")
+    
+    # Frontend files
+    create_file('AddisGlobalTrader/frontend/src/App.js', """import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import AdminDashboard from './pages/AdminDashboard';
+import VirtualCampus from './pages/VirtualCampus';
+import VirtualReceptionist from './pages/VirtualReceptionist';
+import './i18n';
+
+function App() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/" exact component={HomePage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/campus" component={VirtualCampus} />
+        <Route path="/receptionist" component={VirtualReceptionist} />
+      </Switch>
+    </Router>
+  );
+}
+
+export default App;
+""")
+    
+    create_file('AddisGlobalTrader/frontend/src/index.js', """import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+""")
+    
+    create_file('AddisGlobalTrader/frontend/src/i18n.js', """import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import HttpApi from 'i18next-http-backend';
+
+i18n
+  .use(HttpApi)
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    supportedLngs: ['en', 'am'],
+    fallbackLng: 'en',
+    detection: {
+      order: ['path', 'cookie', 'htmlTag', 'localStorage', 'subdomain'],
+      caches: ['cookie']
+
+
+
+//Backend
+
+# backend/app/__init__.py
+//Python
+
+from flask import Flask
+from .config import Config
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    with app.app_context():
+        from . import routes, education_routes, receptionist_routes, stock_routes, investor_routes, financial_routes, corporate_routes
+        return app
+
+
+# backend/app/models.py
+//Python
+
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    language = db.Column(db.String(10), nullable=False)
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    url = db.Column(db.String(200), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+class BankStatement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    statement = db.Column(db.Text, nullable=False)
+
+class Stock(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(10), unique=True, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    insider_shares = db.Column(db.Float, nullable=False)
+    institutional_shares = db.Column(db.Float, nullable=False)
+    public_shares = db.Column(db.Float, nullable=False)
+
+class Investor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    investment_amount = db.Column(db.Float, nullable=False)
+
+class FinancialReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
+class CorporatePolicy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+
+
+# backend/app/routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, User
+
+bp = Blueprint('main', __name__)
+
+@bp.route('/users', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    new_user = User(username=data['username'], email=data['email'], password=data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User created successfully'}), 201
+
+
+# backend/app/education_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, Course, Video
+
+education_bp = Blueprint('education', __name__)
+
+@education_bp.route('/courses', methods=['GET'])
+def get_courses():
+    courses = Course.query.all()
+    return jsonify([course.to_dict() for course in courses])
+
+@education_bp.route('/courses', methods=['POST'])
+def add_course():
+    data = request.get_json()
+    new_course = Course(
+        title=data['title'],
+        description=data['description'],
+        language=data['language']
+    )
+    db.session.add(new_course)
+    db.session.commit()
+    return jsonify(new_course.to_dict()), 201
+
+@education_bp.route('/videos', methods=['POST'])
+def add_video():
+    data = request.get_json()
+    new_video = Video(
+        title=data['title'],
+        url=data['url'],
+        course_id=data['course_id']
+    )
+    db.session.add(new_video)
+    db.session.commit()
+    return jsonify(new_video.to_dict()), 201
+
+
+# backend/app/receptionist_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, User, BankStatement
+from .ai_receptionist import AIReceptionist
+
+receptionist_bp = Blueprint('receptionist', __name__)
+ai_receptionist = AIReceptionist()
+
+@receptionist_bp.route('/register', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    new_user = User(username=data['username'], email=data['email'], password=data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User registered successfully'}), 201
+
+@receptionist_bp.route('/bank_statements', methods=['GET'])
+def get_bank_statements():
+    user_id = request.args.get('user_id')
+    statements = BankStatement.query.filter_by(user_id=user_id).all()
+    return jsonify([statement.to_dict() for statement in statements])
+
+
+# backend/app/ai_receptionist.py
+//Python
+
+class AIReceptionist:
+    def __init__(self):
+        # Initialize AI model and other necessary components
+        pass
+
+    def handle_request(self, request_data):
+        # Process the request and generate a response
+        pass
+
+
+
+# backend/app/stock_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, Stock
+
+stock_bp = Blueprint('stock', __name__)
+
+@stock_bp.route('/stocks', methods=['GET'])
+def get_stocks():
+    stocks = Stock.query.all()
+    return jsonify([stock.to_dict() for stock in stocks])
+
+@stock_bp.route('/stocks', methods=['POST'])
+def add_stock():
+    data = request.get_json()
+    new_stock = Stock(
+        symbol=data['symbol'],
+        price=data['price'],
+        insider_shares=data['insider_shares'],
+        institutional_shares=data['institutional_shares'],
+        public_shares=data['public_shares']
+    )
+    db.session.add(new_stock)
+    db.session.commit()
+    return jsonify(new_stock.to_dict()), 201
+
+
+
+
+
+# backend/app/investor_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, Investor
+
+investor_bp = Blueprint('investor', __name__)
+
+@investor_bp.route('/investors', methods=['GET'])
+def get_investors():
+    investors = Investor.query.all()
+    return jsonify([investor.to_dict() for investor in investors])
+
+@investor_bp.route('/investors', methods=['POST'])
+def add_investor():
+    data = request.get_json()
+    new_investor = Investor(
+        name=data['name'],
+        email=data['email'],
+        investment_amount=data['investment_amount']
+    )
+    db.session.add(new_investor)
+    db.session.commit()
+    return jsonify(new_investor.to_dict()), 201
+
+backend/app/financial_routes.py
+Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, FinancialReport
+
+financial_bp = Blueprint('financial', __name__)
+
+@financial_bp.route('/financials', methods=['GET'])
+def get_financials():
+    reports = FinancialReport.query.all()
+    return jsonify([report.to_dict() for report in reports])
+
+@financial_bp.route('/financials', methods=['POST'])
+def add_financial_report():
+    data = request.get_json()
+    new_report = FinancialReport(
+        title=data['title'],
+        content=data['content'],
+        date=data['date']
+    )
+    db.session.add(new_report)
+    db.session.commit()
+    return jsonify(new_report.to_dict()), 201
+
+
+
+
+
+# backend/app/corporate_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, CorporatePolicy
+
+corporate_bp = Blueprint('corporate', __name__)
+
+@corporate_bp.route('/policies', methods=['GET'])
+def get_policies():
+    policies = CorporatePolicy.query.all()
+    return jsonify([policy.to_dict() for policy in policies])
+
+@corporate_bp.route('/policies', methods=['POST'])
+def add_policy():
+    data = request.get_json()
+    new_policy = CorporatePolicy(
+        title=data['title'],
+        content=data['content']
+    )
+    db.session.add(new_policy)
+    db.session.commit()
+    return jsonify(new_policy.to_dict()), 201
+
+
+
+
+
+//Frontend
+# frontend/src/pages/StockDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function StockDashboard() {
+  const [stocks, setStocks] = useState([]);
+
+  useEffect(() => {
+    axios.get('/stocks')
+      .then(response => setStocks(response.data))
+      .catch(error => console.error('Error fetching stocks:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Stock Dashboard</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Insider Shares</th>
+            <th>Institutional Shares</th>
+            <th>Public Shares</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stocks.map(stock => (
+            <tr key={stock.id}>
+              <td>{stock.symbol}</td>
+              <td>{stock.price}</td>
+              <td>{stock.insider_shares}</td>
+              <td>{stock.institutional_shares}</td>
+              <td>{stock.public_shares}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default StockDashboard;
+
+
+
+# frontend/src/pages/InvestorDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function InvestorDashboard() {
+  const [investors, setInvestors] = useState([]);
+
+  useEffect(() => {
+    axios.get('/investors')
+      .then(response => setInvestors(response.data))
+      .catch(error => console.error('Error fetching investors:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Investor Dashboard</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Investment Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {investors.map(investor => (
+            <tr key={investor.id}>
+              <td>{investor.name}</td>
+              <td>{investor.email}</td>
+              <td>{investor.investment_amount}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default InvestorDashboard;
+
+
+
+
+# frontend/src/pages/FinancialDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function FinancialDashboard() {
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    axios.get('/financials')
+      .then(response => setReports(response.data))
+      .catch(error => console.error('Error fetching financial reports:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Financial Dashboard</h1>
+      {reports.map(report => (
+        <div key={report.id}>
+          <h2>{report.title}</h2>
+          <p>{report.content}</p>
+          <p>Date: {report.date}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default FinancialDashboard;
+
+
+
+# frontend/src/pages/CorporateDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function CorporateDashboard() {
+  const [policies, setPolicies] = useState([]);
+
+  useEffect(() => {
+    axios.get('/policies')
+      .then(response => setPolicies(response.data))
+      .catch(error => console.error('Error fetching policies:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Corporate Dashboard</h1>
+      {policies.map(policy => (
+        <div key={policy.id}>
+          <h2>{policy.title}</h2>
+          <p>{policy.content}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default CorporateDashboard;
+
+Backend
+backend/app/__init__.py
+Python
+
+from flask import Flask
+from .config import Config
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    with app.app_context():
+        from . import routes, education_routes, receptionist_routes, stock_routes, investor_routes, financial_routes, corporate_routes, compliance_routes
+        return app
+
+
+
+# backend/app/models.py
+//Python
+
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    language = db.Column(db.String(10), nullable=False)
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    url = db.Column(db.String(200), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+class BankStatement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    statement = db.Column(db.Text, nullable=False)
+
+class Stock(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(10), unique=True, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    insider_shares = db.Column(db.Float, nullable=False)
+    institutional_shares = db.Column(db.Float, nullable=False)
+    public_shares = db.Column(db.Float, nullable=False)
+
+class Investor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    investment_amount = db.Column(db.Float, nullable=False)
+
+class FinancialReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
+class CorporatePolicy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+
+class ComplianceReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
+
+# backend/app/compliance_routes.py
+//Python
+
+from flask import Blueprint, request, jsonify
+from .models import db, ComplianceReport
+
+compliance_bp = Blueprint('compliance', __name__)
+
+@compliance_bp.route('/compliance_reports', methods=['GET'])
+def get_compliance_reports():
+    reports = ComplianceReport.query.all()
+    return jsonify([report.to_dict() for report in reports])
+
+@compliance_bp.route('/compliance_reports', methods=['POST'])
+def add_compliance_report():
+    data = request.get_json()
+    new_report = ComplianceReport(
+        title=data['title'],
+        content=data['content'],
+        date=data['date']
+    )
+    db.session.add(new_report)
+    db.session.commit()
+    return jsonify(new_report.to_dict()), 201
+
+
+//Frontend
+# frontend/src/pages/ComplianceDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function ComplianceDashboard() {
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    axios.get('/compliance_reports')
+      .then(response => setReports(response.data))
+      .catch(error => console.error('Error fetching compliance reports:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Compliance Dashboard</h1>
+      {reports.map(report => (
+        <div key={report.id}>
+          <h2>{report.title}</h2>
+          <p>{report.content}</p>
+          <p>Date: {report.date}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default ComplianceDashboard;
+
+
+
+
+
