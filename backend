@@ -363,8 +363,8 @@ def add_investor():
     db.session.commit()
     return jsonify(new_investor.to_dict()), 201
 
-backend/app/financial_routes.py
-Python
+# backend/app/financial_routes.py
+//Python
 
 from flask import Blueprint, request, jsonify
 from .models import db, FinancialReport
@@ -417,8 +417,8 @@ def add_policy():
     return jsonify(new_policy.to_dict()), 201
 
 //Backend
-backend/app/__init__.py
-Python
+# backend/app/__init__.py
+//Python
 
 from flask import Flask
 from .config import Config
