@@ -1,0 +1,250 @@
+# Frontend files
+    create_file('AddisGlobalTrader/frontend/src/App.js', """import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import AdminDashboard from './pages/AdminDashboard';
+import VirtualCampus from './pages/VirtualCampus';
+import VirtualReceptionist from './pages/VirtualReceptionist';
+import './i18n';
+
+function App() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/" exact component={HomePage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/campus" component={VirtualCampus} />
+        <Route path="/receptionist" component={VirtualReceptionist} />
+      </Switch>
+    </Router>
+  );
+}
+
+export default App;
+""")
+    
+    create_file('AddisGlobalTrader/frontend/src/index.js', """import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+""")
+    
+    create_file('AddisGlobalTrader/frontend/src/i18n.js', """import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import HttpApi from 'i18next-http-backend';
+
+i18n
+  .use(HttpApi)
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    supportedLngs: ['en', 'am'],
+    fallbackLng: 'en',
+    detection: {
+      order: ['path', 'cookie', 'htmlTag', 'localStorage', 'subdomain'],
+      caches: ['cookie']
+
+
+
+
+
+//Frontend
+# frontend/src/pages/StockDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function StockDashboard() {
+  const [stocks, setStocks] = useState([]);
+
+  useEffect(() => {
+    axios.get('/stocks')
+      .then(response => setStocks(response.data))
+      .catch(error => console.error('Error fetching stocks:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Stock Dashboard</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Insider Shares</th>
+            <th>Institutional Shares</th>
+            <th>Public Shares</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stocks.map(stock => (
+            <tr key={stock.id}>
+              <td>{stock.symbol}</td>
+              <td>{stock.price}</td>
+              <td>{stock.insider_shares}</td>
+              <td>{stock.institutional_shares}</td>
+              <td>{stock.public_shares}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default StockDashboard;
+
+
+
+# frontend/src/pages/InvestorDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function InvestorDashboard() {
+  const [investors, setInvestors] = useState([]);
+
+  useEffect(() => {
+    axios.get('/investors')
+      .then(response => setInvestors(response.data))
+      .catch(error => console.error('Error fetching investors:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Investor Dashboard</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Investment Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {investors.map(investor => (
+            <tr key={investor.id}>
+              <td>{investor.name}</td>
+              <td>{investor.email}</td>
+              <td>{investor.investment_amount}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default InvestorDashboard;
+
+
+
+
+# frontend/src/pages/FinancialDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function FinancialDashboard() {
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    axios.get('/financials')
+      .then(response => setReports(response.data))
+      .catch(error => console.error('Error fetching financial reports:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Financial Dashboard</h1>
+      {reports.map(report => (
+        <div key={report.id}>
+          <h2>{report.title}</h2>
+          <p>{report.content}</p>
+          <p>Date: {report.date}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default FinancialDashboard;
+
+
+
+# frontend/src/pages/CorporateDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function CorporateDashboard() {
+  const [policies, setPolicies] = useState([]);
+
+  useEffect(() => {
+    axios.get('/policies')
+      .then(response => setPolicies(response.data))
+      .catch(error => console.error('Error fetching policies:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Corporate Dashboard</h1>
+      {policies.map(policy => (
+        <div key={policy.id}>
+          <h2>{policy.title}</h2>
+          <p>{policy.content}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default CorporateDashboard;
+
+
+//Frontend
+# frontend/src/pages/ComplianceDashboard.js
+//JavaScript
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function ComplianceDashboard() {
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    axios.get('/compliance_reports')
+      .then(response => setReports(response.data))
+      .catch(error => console.error('Error fetching compliance reports:', error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Compliance Dashboard</h1>
+      {reports.map(report => (
+        <div key={report.id}>
+          <h2>{report.title}</h2>
+          <p>{report.content}</p>
+          <p>Date: {report.date}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default ComplianceDashboard;
+
+
