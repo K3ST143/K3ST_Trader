@@ -3,7 +3,7 @@
 # AlphaLink Holdings Inc.
 
 ## Overview
-AlphaLink Holdings Inc. is  A comprehensive Investment Management Company platform  with AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. This document provides an overview of the project structure and the functionalities implemented.
+AlphaLink Holdings Inc. is  A comprehensive Investment Management Company platform  with AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. Incorporating Most Advanced Industrial platforms Interactive Brokers, Ibex BPO 2.0 CX Solutions, SEMRUSH online Marketing Management Solition Platform and Smartsheet the most advanced project management and workspace platforms fully enriched with AI powered automations. This document provides an overview of the project structure and the functionalities implemented.
 
 ## Project Structure
 - **backend/**: Contains the backend code implemented using Flask.
