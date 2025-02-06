@@ -1,9 +1,9 @@
 
 # README.md
-# Addis Global Trader
+# AlphaLink Holdings Inc.
 
 ## Overview
-Addis Global Trader A comprehensive trading platform with AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. This document provides an overview of the project structure and the functionalities implemented.
+AlphaLink Holdings Inc. is  A comprehensive Investment Management Company platform  with AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. This document provides an overview of the project structure and the functionalities implemented.
 
 ## Project Structure
 - **backend/**: Contains the backend code implemented using Flask.
