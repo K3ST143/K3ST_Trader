@@ -1,5 +1,5 @@
 # Backend files
-    create_file('AddisGlobalTrader/backend/app/__init__.py', """from flask import Flask
+    create_file('K3STTrader/backend/app/__init__.py', """from flask import Flask
 from .config import Config
 
 def create_app():
@@ -11,7 +11,7 @@ def create_app():
         return app
 """)
     
-    create_file('AddisGlobalTrader/backend/app/models.py', """from flask_sqlalchemy import SQLAlchemy
+    create_file('K3STTrader/backend/app/models.py', """from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -39,7 +39,7 @@ class BankStatement(db.Model):
     statement = db.Column(db.Text, nullable=False)
 """)
     
-    create_file('AddisGlobalTrader/backend/app/routes.py', """from flask import Blueprint, request, jsonify
+    create_file('K3STTrader/backend/app/routes.py', """from flask import Blueprint, request, jsonify
 from .models import db, User
 
 bp = Blueprint('main', __name__)
@@ -53,7 +53,7 @@ def create_user():
     return jsonify({'message': 'User created successfully'}), 201
 """)
     
-    create_file('AddisGlobalTrader/backend/app/education_routes.py', """from flask import Blueprint, request, jsonify
+    create_file('K3STTrader/backend/app/education_routes.py', """from flask import Blueprint, request, jsonify
 from .models import db, Course, Video
 
 education_bp = Blueprint('education', __name__)
@@ -88,7 +88,7 @@ def add_video():
     return jsonify(new_video.to_dict()), 201
 """)
     
-    create_file('AddisGlobalTrader/backend/app/receptionist_routes.py', """from flask import Blueprint, request, jsonify
+    create_file('K3STTrader/backend/app/receptionist_routes.py', """from flask import Blueprint, request, jsonify
 from .models import db, User, BankStatement
 from .ai_receptionist import AIReceptionist
 
@@ -110,7 +110,7 @@ def get_bank_statements():
     return jsonify([statement.to_dict() for statement in statements])
 """)
     
-    create_file('AddisGlobalTrader/backend/app/ai_receptionist.py', """class AIReceptionist:
+    create_file('K3STTrader/backend/app/ai_receptionist.py', """class AIReceptionist:
     def __init__(self):
         # Initialize AI model and other necessary components
         pass
@@ -120,19 +120,19 @@ def get_bank_statements():
         pass
 """)
     
-    create_file('AddisGlobalTrader/backend/config.py', """class Config:
+    create_file('K3STTrader/backend/config.py', """class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_TRANSLATION_DIRECTORIES = '../translations'
 """)
     
-    create_file('AddisGlobalTrader/backend/requirements.txt', """Flask
+    create_file('K3STTrader/backend/requirements.txt', """Flask
 Flask-SQLAlchemy
 Flask-Babel
 """)
     
-    create_file('AddisGlobalTrader/backend/run.py', """from app import create_app
+    create_file('K3STTrader/backend/run.py', """from app import create_app
 
 app = create_app()
 
