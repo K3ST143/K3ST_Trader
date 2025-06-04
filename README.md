@@ -1,9 +1,9 @@
 
 # README.md
-# AlphaLink Holdings Inc.
+# K3ST Trader.
 
 ## Overview
-AlphaLink Holdings Inc. is  A comprehensive Investment Management Company with platform enhancing AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. Incorporating the most advanced technological industrial platforms including Interactive Brokers, Ibex BPO 2.0 CX Solutions, SEMRUSH online Marketing Management Solition Platform and Smartsheet the most advanced project management and workspace platforms fully enriched with AI powered automations. This document provides an overview of the project structure and the functionalities implemented.
+K3ST Trader is  A comprehensive Investment Management Company with platform enhancing AI-powered features, multilingual support, and blockchain-enhanced security. It is a comprehensive platform designed to enhance educational training, manage stock and investor relations, and provide robust corporate management tools. Incorporating the most advanced technological industrial platforms including Interactive Brokers, Ibex BPO 2.0 CX Solutions, SEMRUSH online Marketing Management Solition Platform and Smartsheet the most advanced project management and workspace platforms fully enriched with AI powered automations. This document provides an overview of the project structure and the functionalities implemented.
 
 ## Project Structure
 - **backend/**: Contains the backend code implemented using Flask.
