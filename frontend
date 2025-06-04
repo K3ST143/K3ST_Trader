@@ -1,5 +1,5 @@
 # Frontend files
-    create_file('AddisGlobalTrader/frontend/src/App.js', """import React from 'react';
+    create_file('K3STTrader/frontend/src/App.js', """import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -25,7 +25,7 @@ function App() {
 export default App;
 """)
     
-    create_file('AddisGlobalTrader/frontend/src/index.js', """import React from 'react';
+    create_file('K3STTrader/frontend/src/index.js', """import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
@@ -37,7 +37,7 @@ ReactDOM.render(
 );
 """)
     
-    create_file('AddisGlobalTrader/frontend/src/i18n.js', """import i18n from 'i18next';
+    create_file('K3STTrader/frontend/src/i18n.js', """import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import HttpApi from 'i18next-http-backend';
